@@ -44,6 +44,7 @@ function LocationModal({
   onConfirm,
   title,
   subtitle,
+  dismissible = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -52,6 +53,7 @@ function LocationModal({
   onConfirm: (loc: { emirateId: string; emirateName: string; cityId: string; cityName: string }) => void;
   title: string;
   subtitle?: string;
+  dismissible?: boolean;
 }) {
   const [emirates, setEmirates] = useState<Emirate[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -99,13 +101,17 @@ function LocationModal({
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !dismissible) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open, onClose, dismissible]);
+
+  const handleBackdropClick = () => {
+    if (dismissible) onClose();
+  };
 
   const filteredCities = cities.filter((c) => c.emirateId === emirateId);
   const selectedEmirate = emirates.find((e) => e._id === emirateId);
@@ -126,18 +132,18 @@ function LocationModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] grid place-items-center p-4 sm:p-6"
+      className="location-modal-root fixed inset-0 z-[200] grid place-items-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="location-modal-title"
     >
-      <div className="absolute inset-0 bg-plutonic-dark/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="location-modal-backdrop absolute inset-0" onClick={handleBackdropClick} aria-hidden />
 
       <div
-        className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-2xl shadow-sky-900/15 max-h-[min(90vh,640px)] overflow-hidden flex flex-col animate-[slide-down_0.35s_ease-out]"
+        className="location-modal-glass relative z-10 w-full max-w-lg rounded-2xl max-h-[min(90vh,640px)] overflow-hidden flex flex-col animate-[slide-down_0.35s_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400 px-6 py-5 text-white shrink-0">
+        <div className="location-modal-glass-header px-6 py-5 text-white shrink-0">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 text-white/90 text-sm font-medium mb-1">
@@ -145,22 +151,24 @@ function LocationModal({
                 Service area
               </div>
               <h2 id="location-modal-title" className="text-xl font-bold">{title}</h2>
-              {subtitle && <p className="text-white/85 text-sm mt-1">{subtitle}</p>}
+              {subtitle && <p className="text-white/90 text-sm mt-1">{subtitle}</p>}
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2 rounded-xl hover:bg-white/20 transition shrink-0"
-              aria-label="Close"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            {dismissible && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-2 rounded-xl hover:bg-white/20 transition shrink-0"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="location-modal-glass-body p-6 overflow-y-auto flex-1">
           {loading && (
             <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
               <svg className="animate-spin w-5 h-5 mr-2 text-sky-500" fill="none" viewBox="0 0 24 24">
@@ -218,15 +226,17 @@ function LocationModal({
           )}
         </div>
 
-        <div className="border-t border-gray-100 px-6 py-4 flex gap-3 shrink-0 bg-gray-50/80">
-          <button type="button" onClick={onClose} className="btn-outline flex-1 !py-2.5">
-            Cancel
-          </button>
+        <div className="location-modal-glass-footer px-6 py-4 flex gap-3 shrink-0">
+          {dismissible && (
+            <button type="button" onClick={onClose} className="btn-outline flex-1 !py-2.5 bg-white/40">
+              Cancel
+            </button>
+          )}
           <button
             type="button"
             onClick={handleConfirm}
             disabled={!emirateId || !cityId}
-            className="btn-primary flex-1 !py-2.5 disabled:opacity-50"
+            className={`btn-primary !py-2.5 disabled:opacity-50 ${dismissible ? 'flex-1' : 'w-full'}`}
           >
             Confirm
           </button>
@@ -306,13 +316,19 @@ export function LocationGate({ children }: { children: React.ReactNode }) {
 
   if (!location) {
     return (
-      <LocationModal
-        open
-        onClose={() => {}}
-        onConfirm={handleWelcomeConfirm}
-        title="Welcome to Plutonic"
-        subtitle="Select your location to see accurate prices and book services."
-      />
+      <>
+        <div className="location-gate-preview" aria-hidden="true">
+          {children}
+        </div>
+        <LocationModal
+          open
+          dismissible={false}
+          onClose={() => {}}
+          onConfirm={handleWelcomeConfirm}
+          title="Welcome to Plutonic"
+          subtitle="Select your location to see accurate prices and book services."
+        />
+      </>
     );
   }
 
