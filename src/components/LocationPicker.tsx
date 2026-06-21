@@ -132,18 +132,22 @@ function LocationModal({
 
   return createPortal(
     <div
-      className="location-modal-root fixed inset-0 z-[200] grid place-items-center p-4 sm:p-6"
+      className="fixed inset-0 z-[200] grid place-items-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="location-modal-title"
     >
-      <div className="location-modal-backdrop absolute inset-0" onClick={handleBackdropClick} aria-hidden />
+      <div
+        className="absolute inset-0 bg-plutonic-dark/50 backdrop-blur-sm"
+        onClick={handleBackdropClick}
+        aria-hidden
+      />
 
       <div
-        className="location-modal-glass relative z-10 w-full max-w-lg rounded-2xl max-h-[min(90vh,640px)] overflow-hidden flex flex-col animate-[slide-down_0.35s_ease-out]"
+        className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-2xl shadow-sky-900/15 max-h-[min(90vh,640px)] overflow-hidden flex flex-col animate-[slide-down_0.35s_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="location-modal-glass-header px-6 py-5 text-white shrink-0">
+        <div className="bg-gradient-to-r from-sky-500 via-sky-400 to-cyan-400 px-6 py-5 text-white shrink-0">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 text-white/90 text-sm font-medium mb-1">
@@ -151,7 +155,7 @@ function LocationModal({
                 Service area
               </div>
               <h2 id="location-modal-title" className="text-xl font-bold">{title}</h2>
-              {subtitle && <p className="text-white/90 text-sm mt-1">{subtitle}</p>}
+              {subtitle && <p className="text-white/85 text-sm mt-1">{subtitle}</p>}
             </div>
             {dismissible && (
               <button
@@ -168,7 +172,7 @@ function LocationModal({
           </div>
         </div>
 
-        <div className="location-modal-glass-body p-6 overflow-y-auto flex-1">
+        <div className="p-6 overflow-y-auto flex-1 bg-white">
           {loading && (
             <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
               <svg className="animate-spin w-5 h-5 mr-2 text-sky-500" fill="none" viewBox="0 0 24 24">
@@ -226,9 +230,9 @@ function LocationModal({
           )}
         </div>
 
-        <div className="location-modal-glass-footer px-6 py-4 flex gap-3 shrink-0">
+        <div className="border-t border-gray-100 px-6 py-4 flex gap-3 shrink-0 bg-gray-50/80">
           {dismissible && (
-            <button type="button" onClick={onClose} className="btn-outline flex-1 !py-2.5 bg-white/40">
+            <button type="button" onClick={onClose} className="btn-outline flex-1 !py-2.5">
               Cancel
             </button>
           )}
