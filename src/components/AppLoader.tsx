@@ -19,16 +19,22 @@ export default function AppLoader({ message = 'Preparing your experience…', ex
       </div>
 
       <div className="app-loader-content">
-        <div className="app-loader-logo-wrap">
-          <span className="app-loader-ring app-loader-ring-outer" />
-          <span className="app-loader-ring app-loader-ring-inner" />
-          <img
-            src="/assets/branding/logo-white.png"
-            alt="Plutonic"
-            className="app-loader-logo"
-            width={160}
-            height={44}
-          />
+        <div className="app-loader-logo-stage">
+          <div className="app-loader-logo-card">
+            <img
+              src="/assets/branding/logo-white.png"
+              alt="Plutonic"
+              className="app-loader-logo"
+              width={180}
+              height={48}
+            />
+          </div>
+        </div>
+
+        <div className="app-loader-dots" aria-hidden>
+          <span className="app-loader-dot" />
+          <span className="app-loader-dot" />
+          <span className="app-loader-dot" />
         </div>
 
         <p className="app-loader-brand">Plutonic Cleaning &amp; Technical Services</p>
