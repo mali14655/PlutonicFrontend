@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { scrollToTop } from '../lib/scrollToTop';
 
 export default function PageTransition() {
   const location = useLocation();
@@ -9,7 +10,7 @@ export default function PageTransition() {
   useEffect(() => {
     if (location.pathname === displayLocation.pathname) return;
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop({ smooth: true });
 
     setTransitionStage('exit');
     const timer = setTimeout(() => {

@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../api';
 import AnimateIn from '../components/AnimateIn';
 import BusinessProfilePanel from '../components/BusinessProfilePanel';
+import { ConfirmationPanel, NoticeBanner } from '../components/FeedbackMessages';
 import { PageContent, PageHeader } from '../components/PageLayout';
 import {
   ContactInfoRow,
@@ -16,11 +18,17 @@ import { OFFICE_LOCATION, buildDirectionsUrl } from '../lib/officeLocation';
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await api('/bookings/contact', { method: 'POST', body: JSON.stringify(form) });
-    setSent(true);
+    setError('');
+    try {
+      await api('/bookings/contact', { method: 'POST', body: JSON.stringify(form) });
+      setSent(true);
+    } catch (err) {
+      setError((err as Error).message || 'Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -66,18 +74,34 @@ export default function Contact() {
             </div>
           </AnimateIn>
 
-          <AnimateIn variant="slide-left" delay={160} className="premium-card-glow p-8">
+          <AnimateIn variant="slide-left" delay={160}>
             {sent ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center mx-auto text-2xl">
-                  ✓
-                </div>
-                <p className="mt-4 text-green-700 font-semibold text-lg">Thank you!</p>
-                <p className="text-gray-500 text-sm mt-1">We will get back to you soon.</p>
-              </div>
+              <ConfirmationPanel
+                compact
+                variant="success"
+                eyebrow="Message received"
+                title="Thank you for reaching out"
+                description="Your message has been sent to our team. We typically respond within a few hours — for urgent requests, call us directly."
+                actions={
+                  <>
+                    <button type="button" onClick={() => setSent(false)} className="btn-outline">
+                      Send another message
+                    </button>
+                    <Link to="/book" className="btn-primary">
+                      Book a service
+                    </Link>
+                  </>
+                }
+              />
             ) : (
+              <div className="premium-card-glow p-6 sm:p-8">
               <form onSubmit={submit} className="space-y-4">
                 <h2 className="font-bold text-xl text-plutonic-blue-dark mb-2">Send a message</h2>
+                {error && (
+                  <NoticeBanner variant="error" title="Could not send message">
+                    {error}
+                  </NoticeBanner>
+                )}
                 <input
                   className="input-premium"
                   placeholder="Name"
@@ -109,6 +133,7 @@ export default function Contact() {
                 />
                 <button type="submit" className="btn-primary w-full">Send Message</button>
               </form>
+              </div>
             )}
           </AnimateIn>
         </div>

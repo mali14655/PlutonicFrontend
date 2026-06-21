@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { LocationProvider } from './context/LocationContext';
 import BootGate from './components/BootGate';
+import ScrollToTop from './components/ScrollToTop';
 import { LocationGate } from './components/LocationPicker';
 import Layout from './components/Layout';
 import AdminLayout from './components/admin/AdminLayout';
@@ -23,6 +24,7 @@ export default function App() {
   return (
     <LocationProvider>
       <BootGate>
+        <ScrollToTop />
         <Routes>
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminLayout />}>

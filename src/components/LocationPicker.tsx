@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api } from '../api';
+import { NoticeBanner } from './FeedbackMessages';
 import { useLocation } from '../context/LocationContext';
 
 interface Emirate {
@@ -184,7 +185,9 @@ function LocationModal({
           )}
 
           {error && (
-            <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm p-4 mb-4">{error}</div>
+            <NoticeBanner variant="error" title="Could not load locations" className="mb-4">
+              {error}
+            </NoticeBanner>
           )}
 
           {!loading && !error && (

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import PageTransition from './PageTransition';
 import LocationPicker from './LocationPicker';
 import BrandLogo from './BrandLogo';
@@ -33,8 +33,10 @@ const quickLinks = [
 ];
 
 export default function Layout() {
+  const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const directionsUrl = buildDirectionsUrl();
+  const hideWaFab = pathname.startsWith('/book') || pathname.startsWith('/services/');
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
@@ -169,6 +171,7 @@ export default function Layout() {
         </div>
       </footer>
 
+      {!hideWaFab && (
       <a
         href="https://wa.me/971561615616"
         target="_blank"
@@ -182,6 +185,7 @@ export default function Layout() {
         </svg>
         <span className="wa-fab-label">WhatsApp</span>
       </a>
+      )}
     </div>
   );
 }

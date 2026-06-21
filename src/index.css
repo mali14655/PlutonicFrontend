@@ -869,6 +869,159 @@ html {
   }
 }
 
+.book-sticky-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+#book-top {
+  scroll-margin-top: calc(var(--header-height) + 0.5rem);
+}
+
+/* ── Feedback & confirmation messages ── */
+.status-icon {
+  @apply flex items-center justify-center rounded-2xl shrink-0;
+  animation: status-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.status-icon--md {
+  @apply w-12 h-12;
+}
+
+.status-icon--lg {
+  @apply w-16 h-16;
+}
+
+.status-icon--success {
+  @apply text-green-600;
+  background: linear-gradient(145deg, #dcfce7 0%, #bbf7d0 100%);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.22);
+}
+
+.status-icon--warning {
+  @apply text-amber-600;
+  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+}
+
+.status-icon--error {
+  @apply text-red-600;
+  background: linear-gradient(145deg, #fee2e2 0%, #fecaca 100%);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+}
+
+.status-icon--info {
+  @apply text-plutonic-blue;
+  background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.2);
+}
+
+@keyframes status-pop {
+  from {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.confirmation-panel {
+  @apply text-center max-w-lg mx-auto overflow-hidden;
+}
+
+.confirmation-panel--compact {
+  @apply max-w-md;
+}
+
+.confirmation-panel__hero {
+  @apply px-6 pt-8 pb-6 sm:px-8 sm:pt-10 sm:pb-7;
+}
+
+.confirmation-panel--compact .confirmation-panel__hero {
+  @apply px-5 pt-6 pb-5 sm:px-6;
+}
+
+.confirmation-panel__hero .status-icon {
+  @apply mx-auto;
+}
+
+.confirmation-panel__eyebrow {
+  @apply mt-5 text-xs font-bold uppercase tracking-[0.18em] text-plutonic-blue;
+}
+
+.confirmation-panel__title {
+  @apply mt-3 text-2xl sm:text-3xl font-bold text-plutonic-blue-dark tracking-tight;
+}
+
+.confirmation-panel--compact .confirmation-panel__title {
+  @apply text-xl sm:text-2xl;
+}
+
+.confirmation-panel__description {
+  @apply mt-3 text-gray-600 text-sm sm:text-base leading-relaxed max-w-md mx-auto;
+}
+
+.confirmation-panel__details {
+  @apply mx-4 sm:mx-6 mb-2 rounded-xl border border-sky-100 bg-white/80 divide-y divide-sky-100/80 text-left overflow-hidden;
+}
+
+.confirmation-panel__body {
+  @apply px-4 sm:px-6 pb-2 space-y-4 text-left;
+}
+
+.confirmation-panel__actions {
+  @apply flex flex-wrap justify-center gap-3 px-6 pb-8 pt-4 sm:px-8 sm:pb-10;
+}
+
+.confirmation-detail-row {
+  @apply flex items-center justify-between gap-4 px-4 py-3.5 sm:px-5;
+}
+
+.confirmation-detail-row__label {
+  @apply text-xs font-semibold uppercase tracking-wide text-gray-500 shrink-0;
+}
+
+.confirmation-detail-row__value {
+  @apply text-sm font-medium text-plutonic-blue-dark text-right;
+}
+
+.confirmation-detail-row__value--highlight {
+  @apply text-lg font-bold text-plutonic-blue;
+}
+
+.info-block {
+  @apply rounded-xl border border-sky-100 bg-white/90 p-5 text-sm text-left;
+}
+
+.info-block__title {
+  @apply font-bold text-plutonic-blue-dark mb-3 flex items-center gap-2;
+}
+
+.info-block__content {
+  @apply space-y-1.5 text-gray-700 leading-relaxed;
+}
+
+.info-block__content p + p {
+  @apply mt-2;
+}
+
+.next-steps-list {
+  @apply space-y-3 text-sm text-gray-700;
+}
+
+.next-steps-list__item {
+  @apply flex items-start gap-3;
+}
+
+.next-steps-list__num {
+  @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-plutonic-blue text-white text-xs font-bold;
+}
+
+.notice-banner svg {
+  @apply w-5 h-5;
+}
+
 /* ── Booking steps ── */
 .step-ring {
   @apply flex h-12 w-12 items-center justify-center rounded-2xl font-bold text-white shadow-lg;

@@ -1,16 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation as useRouterLocation } from 'react-router-dom';
 import { api } from '../api';
+import { scrollBookWizardToTop } from '../lib/scrollToTop';
+import { NoticeBanner } from '../components/FeedbackMessages';
 import { useLocation } from '../context/LocationContext';
 import { EmptyState, PageContent, PageHeader } from '../components/PageLayout';
 import BookServicePicker, { type CategoryGroup } from '../components/BookServicePicker';
 import BookingDatePicker, { toYmd } from '../components/BookingDatePicker';
 
 const STEPS = [
-  { id: 1, label: 'Services' },
-  { id: 2, label: 'Schedule & details' },
-  { id: 3, label: 'Payment' },
+  { id: 1, label: 'Services', short: 'Services' },
+  { id: 2, label: 'Schedule & details', short: 'Schedule' },
+  { id: 3, label: 'Payment', short: 'Payment' },
 ] as const;
+
+type OrderSummaryProps = {
+  locationLabel: string;
+  selectedItems: { _id: string; name: string; priceAed: number | null; durationMinutes: number }[];
+  subtotal: number;
+  discount: number;
+  discountPct: number;
+  minServices: number;
+  total: number;
+  date: string;
+  slotStart: string;
+  customerName: string;
+  variant?: 'full' | 'compact';
+};
 
 function OrderSummary({
   locationLabel,
@@ -23,31 +39,24 @@ function OrderSummary({
   date,
   slotStart,
   customerName,
-}: {
-  locationLabel: string;
-  selectedItems: { _id: string; name: string; priceAed: number | null; durationMinutes: number }[];
-  subtotal: number;
-  discount: number;
-  discountPct: number;
-  minServices: number;
-  total: number;
-  date: string;
-  slotStart: string;
-  customerName: string;
-}) {
+  variant = 'full',
+}: OrderSummaryProps) {
   const selectedCount = selectedItems.length;
   const servicesNeeded = Math.max(0, minServices - selectedCount);
   const discountActive = discountPct > 0 && selectedCount >= minServices;
+  const isCompact = variant === 'compact';
 
   return (
-    <div className="premium-card-glow p-6 lg:sticky lg:top-24">
-      <h2 className="font-bold text-lg text-plutonic-blue-dark pb-4 border-b border-sky-100">
-        Order summary
-      </h2>
+    <div className={isCompact ? 'pt-3' : 'premium-card-glow p-4 sm:p-6 lg:sticky lg:top-24'}>
+      {!isCompact && (
+        <h2 className="font-bold text-lg text-plutonic-blue-dark pb-4 border-b border-sky-100">
+          Order summary
+        </h2>
+      )}
 
       {discountPct > 0 && (
         <div
-          className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
+          className={`${isCompact ? 'mt-0' : 'mt-4'} rounded-xl border px-4 py-3 text-sm ${
             discountActive
               ? 'border-green-200 bg-green-50'
               : 'border-sky-200 bg-sky-50/80'
@@ -124,6 +133,49 @@ function OrderSummary({
   );
 }
 
+function MobileOrderSummary(props: OrderSummaryProps) {
+  const [open, setOpen] = useState(false);
+  const { selectedItems, total } = props;
+
+  if (selectedItems.length === 0) return null;
+
+  return (
+    <div className="premium-card-glow overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 p-4 text-left"
+        aria-expanded={open}
+      >
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Order summary</p>
+          <p className="font-bold text-plutonic-blue truncate">
+            AED {total}
+            <span className="font-medium text-gray-500 text-sm">
+              {' '}
+              · {selectedItems.length} service{selectedItems.length !== 1 ? 's' : ''}
+            </span>
+          </p>
+        </div>
+        <svg
+          className={`w-5 h-5 shrink-0 text-plutonic-blue transition-transform ${open ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="px-4 pb-4 border-t border-sky-100">
+          <OrderSummary {...props} variant="compact" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Book() {
   const { location } = useLocation();
   const navigate = useNavigate();
@@ -138,6 +190,8 @@ export default function Book() {
   const [customer, setCustomer] = useState({ name: '', phone: '', email: '', address: '', notes: '' });
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank_transfer' | 'stripe'>('cash');
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const stepScrollRef = useRef(1);
   const [settings, setSettings] = useState<{
     customDiscountPercent: number;
     customDiscountMinServices: number;
@@ -192,9 +246,34 @@ export default function Book() {
   const canContinueStep2 =
     Boolean(date && slotStart && customer.name.trim() && customer.phone.trim() && customer.address.trim());
 
+  const goToStep = (next: number) => {
+    setStep(next);
+    setSubmitError('');
+  };
+
+  useEffect(() => {
+    if (stepScrollRef.current === step) return;
+    stepScrollRef.current = step;
+    scrollBookWizardToTop();
+  }, [step]);
+
+  const summaryProps: OrderSummaryProps = {
+    locationLabel: `${location?.cityName ?? ''}, ${location?.emirateName ?? ''}`,
+    selectedItems,
+    subtotal,
+    discount,
+    discountPct,
+    minServices,
+    total,
+    date,
+    slotStart,
+    customerName: customer.name.trim(),
+  };
+
   const submit = async () => {
     if (!location || selected.size === 0 || !date || !slotStart) return;
     setLoading(true);
+    setSubmitError('');
     try {
       const result = await api<{
         booking: { ref: string; total: number };
@@ -228,7 +307,8 @@ export default function Book() {
         },
       });
     } catch (e) {
-      alert((e as Error).message);
+      setSubmitError((e as Error).message || 'Could not complete your booking. Please try again.');
+      scrollBookWizardToTop();
     } finally {
       setLoading(false);
     }
@@ -241,14 +321,15 @@ export default function Book() {
   const locationLabel = `${location.cityName}, ${location.emirateName}`;
 
   return (
+    <div className="book-flow pb-safe lg:pb-0" id="book-top">
     <PageContent>
       <PageHeader title="Book a Service" subtitle={locationLabel} />
 
-      <div className="flex gap-2 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-none flex-nowrap sm:flex-wrap">
+      <div className="flex gap-2 mb-4 sm:mb-8 overflow-x-auto pb-1 scrollbar-none flex-nowrap -mx-1 px-1">
         {STEPS.map((s) => (
           <div
             key={s.id}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-colors shrink-0 ${
               step === s.id
                 ? 'bg-plutonic-blue text-white shadow-md shadow-sky-200/50'
                 : step > s.id
@@ -256,18 +337,29 @@ export default function Book() {
                   : 'bg-white border border-sky-100 text-gray-400'
             }`}
           >
-            <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
+            <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] sm:text-xs font-bold">
               {s.id}
             </span>
-            {s.label}
+            <span className="sm:hidden">{s.short}</span>
+            <span className="hidden sm:inline">{s.label}</span>
           </div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-2">
+      <div className="lg:hidden mb-4">
+        <MobileOrderSummary {...summaryProps} locationLabel={locationLabel} />
+      </div>
+
+      {submitError && (
+        <NoticeBanner variant="error" title="Booking could not be completed" className="mb-4">
+          {submitError}
+        </NoticeBanner>
+      )}
+
+      <div className="grid lg:grid-cols-3 gap-4 sm:gap-8 items-start">
+        <div className="lg:col-span-2 min-w-0">
           {step === 1 && (
-            <section className="premium-card p-6 md:p-8">
+            <section className="premium-card p-4 sm:p-6 md:p-8">
               <h2 className="font-bold text-lg text-plutonic-blue-dark mb-1">Select services</h2>
               <p className="text-sm text-gray-500 mb-4">
                 Tap a category to browse services. You can select from more than one category.
@@ -288,10 +380,10 @@ export default function Book() {
                 onToggleService={toggle}
                 preselectedSlug={routerState?.subServiceSlug}
               />
-              <div className="mt-8 flex justify-end">
+              <div className="mt-8 hidden lg:flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setStep(2)}
+                  onClick={() => goToStep(2)}
                   disabled={!canContinueStep1}
                   className="btn-primary !px-8 disabled:opacity-50"
                 >
@@ -302,7 +394,7 @@ export default function Book() {
           )}
 
           {step === 2 && (
-            <section className="premium-card p-6 md:p-8 space-y-8">
+            <section className="premium-card p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
               <div>
                 <h2 className="font-bold text-lg text-plutonic-blue-dark mb-1">Date & time</h2>
                 <p className="text-sm text-gray-500 mb-4">Pick when you would like us to visit.</p>
@@ -374,13 +466,13 @@ export default function Book() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3 justify-between pt-2">
-                <button type="button" onClick={() => setStep(1)} className="btn-outline">
+              <div className="hidden lg:flex flex-wrap gap-3 justify-between pt-2">
+                <button type="button" onClick={() => goToStep(1)} className="btn-outline">
                   ← Back
                 </button>
                 <button
                   type="button"
-                  onClick={() => setStep(3)}
+                  onClick={() => goToStep(3)}
                   disabled={!canContinueStep2}
                   className="btn-primary !px-8 disabled:opacity-50"
                 >
@@ -391,7 +483,7 @@ export default function Book() {
           )}
 
           {step === 3 && (
-            <section className="premium-card p-6 md:p-8">
+            <section className="premium-card p-4 sm:p-6 md:p-8">
               <h2 className="font-bold text-lg text-plutonic-blue-dark mb-1">Payment</h2>
               <p className="text-sm text-gray-500 mb-6">Choose how you would like to pay.</p>
               <div className="space-y-3">
@@ -421,8 +513,8 @@ export default function Book() {
                 ))}
               </div>
 
-              <div className="flex flex-wrap gap-3 justify-between mt-8">
-                <button type="button" onClick={() => setStep(2)} className="btn-outline">
+              <div className="hidden lg:flex flex-wrap gap-3 justify-between mt-8">
+                <button type="button" onClick={() => goToStep(2)} className="btn-outline">
                   ← Back
                 </button>
                 <button
@@ -438,21 +530,64 @@ export default function Book() {
           )}
         </div>
 
-        <div className="lg:col-span-1">
-          <OrderSummary
-            locationLabel={locationLabel}
-            selectedItems={selectedItems}
-            subtotal={subtotal}
-            discount={discount}
-            discountPct={discountPct}
-            minServices={minServices}
-            total={total}
-            date={date}
-            slotStart={slotStart}
-            customerName={customer.name.trim()}
-          />
+        <div className="hidden lg:block lg:col-span-1">
+          <OrderSummary {...summaryProps} locationLabel={locationLabel} />
         </div>
       </div>
     </PageContent>
+
+    <div className="book-sticky-bar fixed bottom-0 inset-x-0 z-40 border-t border-sky-200 bg-white/95 backdrop-blur-md shadow-[0_-8px_30px_rgba(14,165,233,0.12)] lg:hidden">
+      <div className="site-container py-3 flex items-center gap-2 sm:gap-3">
+        {selectedItems.length > 0 && (
+          <div className="shrink-0 min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Total</p>
+            <p className="font-bold text-plutonic-blue text-sm sm:text-base">AED {total}</p>
+          </div>
+        )}
+        <div className="flex flex-1 gap-2 justify-end min-w-0">
+          {step === 1 && (
+            <button
+              type="button"
+              onClick={() => goToStep(2)}
+              disabled={!canContinueStep1}
+              className="btn-primary flex-1 sm:flex-none sm:!px-8 disabled:opacity-50"
+            >
+              Continue →
+            </button>
+          )}
+          {step === 2 && (
+            <>
+              <button type="button" onClick={() => goToStep(1)} className="btn-outline flex-1 sm:flex-none">
+                ← Back
+              </button>
+              <button
+                type="button"
+                onClick={() => goToStep(3)}
+                disabled={!canContinueStep2}
+                className="btn-primary flex-1 sm:flex-none sm:!px-8 disabled:opacity-50"
+              >
+                Continue →
+              </button>
+            </>
+          )}
+          {step === 3 && (
+            <>
+              <button type="button" onClick={() => goToStep(2)} className="btn-outline flex-1 sm:flex-none">
+                ← Back
+              </button>
+              <button
+                type="button"
+                onClick={submit}
+                disabled={loading}
+                className="btn-primary flex-1 sm:flex-none sm:!px-6 disabled:opacity-50"
+              >
+                {loading ? 'Processing…' : 'Confirm'}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+    </div>
   );
 }

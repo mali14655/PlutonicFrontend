@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import AnimateIn from '../components/AnimateIn';
-import { EmptyState, PageContent, PageShell } from '../components/PageLayout';
+import { ConfirmationPanel, NoticeBanner } from '../components/FeedbackMessages';
+import { PageContent, PageShell } from '../components/PageLayout';
 
 export default function Reschedule() {
   const { token } = useParams();
@@ -15,6 +16,7 @@ export default function Reschedule() {
   const [selected, setSelected] = useState<number | null>(null);
   const [done, setDone] = useState(searchParams.get('done') === '1');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!token) return;
@@ -27,7 +29,10 @@ export default function Reschedule() {
         body: JSON.stringify({ optionIndex: idx }),
       })
         .then(() => setDone(true))
-        .catch(() => setLoading(false))
+        .catch(() => {
+          setError('This link may have expired or already been used.');
+          setLoading(false);
+        })
         .finally(() => setLoading(false));
       return;
     }
@@ -44,38 +49,89 @@ export default function Reschedule() {
 
   const submit = async () => {
     if (selected === null || !token) return;
-    await api(`/bookings/reschedule/${token}/select`, {
-      method: 'POST',
-      body: JSON.stringify({ optionIndex: selected }),
-    });
-    setDone(true);
+    setError('');
+    try {
+      await api(`/bookings/reschedule/${token}/select`, {
+        method: 'POST',
+        body: JSON.stringify({ optionIndex: selected }),
+      });
+      setDone(true);
+    } catch (err) {
+      setError((err as Error).message || 'Could not save your selection. Please try again.');
+    }
   };
 
   if (loading) {
     return (
       <PageContent>
-        <div className="flex justify-center py-16">
+        <div className="flex flex-col items-center justify-center py-16 gap-4">
           <div className="w-10 h-10 rounded-full border-4 border-plutonic-blue/20 border-t-plutonic-blue animate-spin" />
+          <p className="text-sm text-gray-500">Loading your reschedule options…</p>
         </div>
       </PageContent>
     );
   }
 
   if (!data && !done) {
-    return <EmptyState>Invalid or expired link.</EmptyState>;
+    return (
+      <PageContent narrow>
+        <AnimateIn variant="fade-up">
+          <ConfirmationPanel
+            variant="error"
+            eyebrow="Reschedule"
+            title="Link unavailable"
+            description="This reschedule link is invalid or has expired. Please check your WhatsApp message for a fresh link, or contact us directly."
+            actions={
+              <>
+                <Link to="/" className="btn-outline">
+                  Go home
+                </Link>
+                <Link to="/contact" className="btn-primary">
+                  Contact us
+                </Link>
+              </>
+            }
+          />
+        </AnimateIn>
+      </PageContent>
+    );
   }
 
   if (done) {
+    const selectedOption =
+      data && selected !== null ? data.options[selected] : data?.options[data.customerSelectedIndex ?? -1];
+
     return (
-      <PageContent>
-        <AnimateIn variant="fade-up" className="premium-card-glow p-8 md:p-10 text-center max-w-md mx-auto mesh-sky-bg border border-sky-100">
-          <div className="w-14 h-14 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center mx-auto text-xl font-bold">
-            ✓
-          </div>
-          <h1 className="text-xl font-bold text-plutonic-blue-dark mt-5">Selection received</h1>
-          <p className="text-gray-600 mt-2">
-            {data ? `Booking ${data.ref}: ` : ''}We will confirm your new time shortly via WhatsApp.
-          </p>
+      <PageContent narrow>
+        <AnimateIn variant="fade-up">
+          <ConfirmationPanel
+            variant="success"
+            eyebrow="Reschedule"
+            title="Time slot selected"
+            description="We have received your preferred time. Our team will confirm the final appointment shortly."
+            details={[
+              ...(data?.ref ? [{ label: 'Booking', value: data.ref }] : []),
+              ...(selectedOption
+                ? [
+                    { label: 'Date', value: selectedOption.date },
+                    {
+                      label: 'Time',
+                      value: `${selectedOption.slotStart} – ${selectedOption.slotEnd}`,
+                    },
+                  ]
+                : []),
+            ]}
+            actions={
+              <Link to="/" className="btn-primary">
+                Back to home
+              </Link>
+            }
+          >
+            <NoticeBanner variant="info" title="Confirmation via WhatsApp">
+              You will receive a WhatsApp message once your new appointment time is confirmed. If you do not
+              hear from us within 24 hours, please call us at +971 56 1615616.
+            </NoticeBanner>
+          </ConfirmationPanel>
         </AnimateIn>
       </PageContent>
     );
@@ -85,10 +141,16 @@ export default function Reschedule() {
     <PageShell narrow>
       <AnimateIn variant="blur-up" className="mb-8">
         <h1 className="section-title">Reschedule {data!.ref}</h1>
-        <p className="section-subtitle mt-2">Tap your preferred time</p>
+        <p className="section-subtitle mt-2">Choose your preferred time from the options below.</p>
       </AnimateIn>
 
-      <div className="premium-card-glow p-6 space-y-3">
+      {error && (
+        <NoticeBanner variant="error" title="Something went wrong" className="mb-4">
+          {error}
+        </NoticeBanner>
+      )}
+
+      <div className="premium-card-glow p-4 sm:p-6 space-y-3">
         {data!.options.map((opt, i) => (
           <button
             key={i}
@@ -96,15 +158,18 @@ export default function Reschedule() {
             onClick={() => setSelected(i)}
             className={`w-full p-4 border rounded-xl text-left transition-all ${
               selected === i
-                ? 'border-sky-400 bg-sky-50 shadow-md shadow-sky-200/50'
+                ? 'border-sky-400 bg-sky-50 shadow-md shadow-sky-200/50 ring-2 ring-sky-200/60'
                 : 'border-sky-100 hover:border-sky-300 hover:bg-sky-50/50'
             }`}
           >
-            <span className="inline-block w-7 h-7 rounded-full bg-plutonic-blue text-white text-sm font-bold text-center leading-7 mr-2">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-plutonic-blue text-white text-sm font-bold mr-2">
               {i + 1}
             </span>
             <span className="font-semibold text-plutonic-blue-dark">{opt.date}</span>
-            <span className="text-gray-600"> — {opt.slotStart} to {opt.slotEnd}</span>
+            <span className="text-gray-600">
+              {' '}
+              — {opt.slotStart} to {opt.slotEnd}
+            </span>
           </button>
         ))}
       </div>
