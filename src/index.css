@@ -141,10 +141,20 @@ html {
 }
 
 .header-premium {
-  @apply sticky top-0 z-40 border-b border-sky-200/60 bg-white/92 backdrop-blur-xl;
+  @apply fixed top-0 left-0 right-0 z-50 border-b border-sky-200/60 bg-white/95 backdrop-blur-xl;
   box-shadow:
     0 1px 0 rgba(56, 189, 248, 0.08),
-    0 8px 32px rgba(14, 165, 233, 0.08);
+    0 8px 32px rgba(14, 165, 233, 0.1);
+}
+
+:root {
+  --header-height: 3.25rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-height: 3.75rem;
+  }
 }
 
 /* Logo sits flush in header — same frosted bg, rounded, no skew/distortion */
@@ -587,9 +597,209 @@ html {
   }
 }
 
+/* ── App splash loader ── */
+.app-loader {
+  @apply fixed inset-0 z-[200] flex items-center justify-center overflow-hidden;
+  background: linear-gradient(145deg, #0c4a6e 0%, #0369a1 35%, #0ea5e9 70%, #38bdf8 100%);
+  animation: loader-enter 0.5s ease-out forwards;
+}
+
+.app-loader-exit {
+  animation: loader-exit 0.52s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+.app-loader-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(243, 208, 40, 0.18), transparent 45%),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.12), transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(14, 165, 233, 0.35), transparent 50%);
+  animation: loader-bg-shift 8s ease-in-out infinite alternate;
+}
+
+.app-loader-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.app-loader-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.45;
+}
+
+.app-loader-orb-1 {
+  width: 280px;
+  height: 280px;
+  top: -80px;
+  left: -60px;
+  background: rgba(243, 208, 40, 0.35);
+  animation: loader-float 6s ease-in-out infinite;
+}
+
+.app-loader-orb-2 {
+  width: 220px;
+  height: 220px;
+  bottom: -40px;
+  right: -30px;
+  background: rgba(56, 189, 248, 0.5);
+  animation: loader-float 7s ease-in-out infinite reverse;
+}
+
+.app-loader-orb-3 {
+  width: 160px;
+  height: 160px;
+  top: 40%;
+  right: 15%;
+  background: rgba(255, 255, 255, 0.2);
+  animation: loader-float 5s ease-in-out infinite 0.5s;
+}
+
+.app-loader-content {
+  @apply relative z-10 flex flex-col items-center text-center px-6 max-w-sm;
+  animation: loader-content-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+
+.app-loader-logo-wrap {
+  @apply relative flex items-center justify-center;
+  width: 7.5rem;
+  height: 7.5rem;
+}
+
+.app-loader-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+.app-loader-ring-outer {
+  inset: 0;
+  border-top-color: rgba(243, 208, 40, 0.9);
+  border-right-color: rgba(243, 208, 40, 0.35);
+  animation: loader-spin 1.4s linear infinite;
+}
+
+.app-loader-ring-inner {
+  inset: 0.65rem;
+  border-bottom-color: rgba(255, 255, 255, 0.85);
+  border-left-color: rgba(255, 255, 255, 0.25);
+  animation: loader-spin 1s linear infinite reverse;
+}
+
+.app-loader-logo {
+  @apply relative z-10 w-auto object-contain;
+  height: 2.25rem;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+  animation: loader-logo-pulse 2s ease-in-out infinite;
+}
+
+.app-loader-brand {
+  @apply mt-6 text-white font-bold text-sm sm:text-base tracking-wide;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.app-loader-tagline {
+  @apply mt-2 text-sm font-medium;
+  background: linear-gradient(90deg, #f3d028, #ffe566, #f3d028);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% auto;
+  animation: loader-shimmer 2.5s linear infinite;
+}
+
+.app-loader-bar {
+  @apply mt-8 w-48 h-1 rounded-full overflow-hidden;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.app-loader-bar-fill {
+  @apply block h-full rounded-full;
+  background: linear-gradient(90deg, #f3d028, #fff, #f3d028);
+  background-size: 200% 100%;
+  animation: loader-progress 1.35s cubic-bezier(0.4, 0, 0.2, 1) forwards, loader-shimmer 1s linear infinite;
+}
+
+.app-loader-message {
+  @apply mt-4 text-xs sm:text-sm text-white/75 font-medium tracking-wide;
+  animation: loader-pulse-text 1.5s ease-in-out infinite;
+}
+
+@keyframes loader-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes loader-exit {
+  from { opacity: 1; transform: scale(1); filter: blur(0); }
+  to { opacity: 0; transform: scale(1.04); filter: blur(8px); }
+}
+
+@keyframes loader-content-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes loader-logo-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@keyframes loader-progress {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes loader-shimmer {
+  to { background-position: 200% center; }
+}
+
+@keyframes loader-float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(12px, -16px); }
+}
+
+@keyframes loader-bg-shift {
+  from { opacity: 0.85; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes loader-pulse-text {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-loader,
+  .app-loader-exit,
+  .app-loader-content,
+  .app-loader-ring-outer,
+  .app-loader-ring-inner,
+  .app-loader-logo,
+  .app-loader-bar-fill,
+  .app-loader-tagline,
+  .app-loader-message,
+  .app-loader-orb,
+  .app-loader-bg {
+    animation: none !important;
+  }
+
+  .app-loader-bar-fill {
+    width: 100%;
+  }
+}
+
 /* ── WhatsApp FAB ── */
 .wa-fab {
-  @apply fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 rounded-full bg-green-500 px-3 py-3 sm:px-5 font-semibold text-white shadow-xl shadow-green-500/40 transition-all duration-300;
+  @apply fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 rounded-full bg-green-500 px-3 py-3 sm:px-5 font-semibold text-white shadow-xl shadow-green-500/40 transition-all duration-300;
 }
 
 .wa-fab-label {

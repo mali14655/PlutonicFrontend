@@ -97,7 +97,7 @@ export default function Layout() {
         )}
       </header>
 
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 pt-[var(--header-height)]">
         <PageTransition />
       </main>
 

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { LocationProvider } from './context/LocationContext';
+import BootGate from './components/BootGate';
 import { LocationGate } from './components/LocationPicker';
 import Layout from './components/Layout';
 import AdminLayout from './components/admin/AdminLayout';
@@ -21,7 +22,8 @@ import AdminSettings from './pages/admin/AdminSettings';
 export default function App() {
   return (
     <LocationProvider>
-      <Routes>
+      <BootGate>
+        <Routes>
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
@@ -47,7 +49,8 @@ export default function App() {
           <Route path="about" element={<CompanyProfile />} />
           <Route path="contact" element={<Contact />} />
         </Route>
-      </Routes>
+        </Routes>
+      </BootGate>
     </LocationProvider>
   );
 }
