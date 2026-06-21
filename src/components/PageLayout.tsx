@@ -73,7 +73,7 @@ export function PageContent({
   narrow?: boolean;
 }) {
   return (
-    <div className={`mx-auto px-4 py-14 md:py-20 ${narrow ? 'max-w-4xl' : 'max-w-6xl'} ${className}`}>
+    <div className={`site-container py-10 sm:py-14 md:py-20 ${narrow ? 'max-w-4xl' : ''} ${className}`}>
       {children}
     </div>
   );
@@ -89,7 +89,7 @@ export function PageShell({
   narrow?: boolean;
 }) {
   return (
-    <div className={`mx-auto px-4 py-14 md:py-20 ${narrow ? 'max-w-lg' : 'max-w-6xl'} ${className}`}>
+    <div className={`site-container py-10 sm:py-14 md:py-20 ${narrow ? 'max-w-lg' : ''} ${className}`}>
       {children}
     </div>
   );

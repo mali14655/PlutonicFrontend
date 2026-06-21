@@ -78,7 +78,7 @@ export default function Services() {
       </div>
 
       {data.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-1 -mx-1 px-1 flex-nowrap sm:flex-wrap scrollbar-none">
           {data.map(({ category }) => (
             <button
               key={category._id}

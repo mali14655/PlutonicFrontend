@@ -24,14 +24,32 @@
   display: none;
 }
 
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 
 body {
   font-family: var(--font-sans);
-  @apply bg-plutonic-surface text-gray-800 antialiased;
+  @apply bg-plutonic-surface text-gray-800 antialiased overflow-x-hidden;
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.14), transparent),
     radial-gradient(ellipse 60% 40% at 100% 0%, rgba(14, 165, 233, 0.08), transparent),
     radial-gradient(ellipse 50% 30% at 0% 100%, rgba(243, 208, 40, 0.05), transparent);
+}
+
+html {
+  overflow-x: hidden;
+}
+
+/* Shared page width — consistent horizontal padding on all breakpoints */
+.site-container {
+  @apply max-w-6xl mx-auto w-full px-3 sm:px-4 md:px-5;
 }
 
 /* ── Typography ── */
@@ -50,11 +68,11 @@ body {
 }
 
 .section-title {
-  @apply text-3xl md:text-4xl font-bold text-plutonic-blue-dark tracking-tight;
+  @apply text-2xl sm:text-3xl md:text-4xl font-bold text-plutonic-blue-dark tracking-tight;
 }
 
 .section-subtitle {
-  @apply text-gray-500 mt-2 max-w-2xl;
+  @apply text-gray-500 mt-2 max-w-2xl text-sm sm:text-base px-1;
 }
 
 /* ── Premium cards & 3D ── */
@@ -127,6 +145,33 @@ body {
   box-shadow:
     0 1px 0 rgba(56, 189, 248, 0.08),
     0 8px 32px rgba(14, 165, 233, 0.08);
+}
+
+/* Logo sits flush in header — same frosted bg, rounded, no skew/distortion */
+.brand-logo-header {
+  @apply inline-flex items-center justify-center rounded-lg overflow-hidden;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  line-height: 0;
+}
+
+.brand-logo-img {
+  @apply w-auto object-contain object-left;
+  max-width: 7.5rem;
+  transform: none;
+}
+
+@media (min-width: 640px) {
+  .brand-logo-img {
+    max-width: 9rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .brand-logo-img {
+    max-width: 10.5rem;
+  }
 }
 
 .header-premium::after {
@@ -451,7 +496,12 @@ body {
 }
 
 .header-enter {
-  animation: slide-down 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: header-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes header-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Page route transitions */
@@ -539,10 +589,36 @@ body {
 
 /* ── WhatsApp FAB ── */
 .wa-fab {
-  @apply fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-green-500 px-5 py-3 font-semibold text-white shadow-xl shadow-green-500/40 transition-all duration-300;
+  @apply fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 rounded-full bg-green-500 px-3 py-3 sm:px-5 font-semibold text-white shadow-xl shadow-green-500/40 transition-all duration-300;
 }
+
+.wa-fab-label {
+  @apply hidden sm:inline;
+}
+
 .wa-fab:hover {
   @apply bg-green-600 -translate-y-1 scale-105 shadow-2xl;
+}
+
+/* Location pill — icon-only on very small screens */
+@media (max-width: 639px) {
+  .location-pill {
+    justify-content: center;
+  }
+}
+
+/* Reduce 3D card tilt on touch devices — avoids layout jank */
+@media (max-width: 768px) {
+  .premium-card-3d:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* Safe area for fixed bottom bars (service detail, book flow) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
 }
 
 /* ── Booking steps ── */

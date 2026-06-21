@@ -258,15 +258,16 @@ export default function LocationPicker({ compact }: { compact?: boolean }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group flex items-center gap-2 h-9 min-w-0 max-w-[11rem] sm:max-w-[14rem] pl-3 pr-2.5 rounded-full border border-sky-200/90 bg-white/90 shadow-sm hover:border-sky-400 hover:shadow-md hover:shadow-sky-100 transition-all duration-200"
-        aria-label="Change location"
+        className="location-pill group flex items-center gap-1.5 sm:gap-2 h-9 min-w-0 max-w-[2.25rem] sm:max-w-[9rem] md:max-w-[11rem] pl-2 pr-2 sm:pl-3 sm:pr-2.5 rounded-full border border-sky-200/90 bg-white/90 shadow-sm hover:border-sky-400 hover:shadow-md hover:shadow-sky-100 transition-all duration-200"
+        aria-label={location ? `Location: ${location.cityName}. Change location` : 'Select location'}
+        title={location ? `${location.cityName}, ${location.emirateName}` : 'Select location'}
       >
         <PinIcon className="w-4 h-4 shrink-0 text-sky-500" />
-        <span className="truncate text-sm font-semibold text-plutonic-blue-dark leading-none">
+        <span className="hidden sm:inline truncate text-sm font-semibold text-plutonic-blue-dark leading-none">
           {location ? location.cityName : 'Select area'}
         </span>
         <svg
-          className="w-3.5 h-3.5 shrink-0 text-gray-400 group-hover:text-sky-500 transition-colors"
+          className="hidden sm:block w-3.5 h-3.5 shrink-0 text-gray-400 group-hover:text-sky-500 transition-colors"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

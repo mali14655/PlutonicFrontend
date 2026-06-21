@@ -60,23 +60,23 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <section className="hero-premium min-h-[85vh] flex items-center">
+      <section className="hero-premium min-h-[72vh] sm:min-h-[80vh] md:min-h-[85vh] flex items-center">
         <img src={images.hero} alt="" className="hero-bg" />
-        <div className="hero-content max-w-6xl mx-auto px-4 py-20 md:py-28 w-full">
+        <div className="hero-content site-container py-14 sm:py-20 md:py-28 w-full">
           <div className="max-w-2xl hero-stagger">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-plutonic-gold/20 border border-plutonic-gold/40 text-plutonic-gold font-semibold text-xs uppercase tracking-widest mb-6">
+            <span className="inline-block px-3 sm:px-4 py-1.5 rounded-full bg-plutonic-gold/20 border border-plutonic-gold/40 text-plutonic-gold font-semibold text-[10px] sm:text-xs uppercase tracking-widest mb-4 sm:mb-6">
               UAE Cleaning Experts
             </span>
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-[1.1] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold leading-[1.12] sm:leading-[1.1] tracking-tight">
               Make your world as{' '}
               <span className="text-gradient-gold">clean as mine</span>
             </h1>
-            <p className="text-white/75 mt-6 text-lg md:text-xl leading-relaxed max-w-xl">
+            <p className="text-white/75 mt-4 sm:mt-6 text-base sm:text-lg md:text-xl leading-relaxed max-w-xl">
               Premium cleaning, birds control, and pest control across Dubai, Sharjah, and Abu Dhabi.
             </p>
-            <div className="flex flex-wrap gap-4 mt-10">
-              <Link to="/book" className="btn-gold">Book a Service</Link>
-              <Link to="/services" className="btn-ghost">Browse Services</Link>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mt-8 sm:mt-10">
+              <Link to="/book" className="btn-gold w-full sm:w-auto text-center justify-center">Book a Service</Link>
+              <Link to="/services" className="btn-ghost w-full sm:w-auto text-center justify-center">Browse Services</Link>
             </div>
             {location && (
               <p className="mt-8 text-sm text-white/60 flex items-center gap-2">
@@ -89,7 +89,7 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+      <section className="site-container py-10 sm:py-12 md:py-16">
         <AnimateIn variant="blur-up" className="text-center mb-12">
           <h2 className="section-title">Our Services</h2>
           <p className="section-subtitle mx-auto">Professional solutions tailored for your home and business</p>
@@ -200,7 +200,7 @@ export default function Home() {
       <StatsCounter />
 
       {/* Features */}
-      <section className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+      <section className="site-container py-10 sm:py-12 md:py-16">
         <StaggerGroup className="grid md:grid-cols-3 gap-6" stagger={120}>
           {[
             {

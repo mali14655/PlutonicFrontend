@@ -244,7 +244,7 @@ export default function Book() {
     <PageContent>
       <PageHeader title="Book a Service" subtitle={locationLabel} />
 
-      <div className="flex flex-wrap gap-2 mb-8">
+      <div className="flex gap-2 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-none flex-nowrap sm:flex-wrap">
         {STEPS.map((s) => (
           <div
             key={s.id}

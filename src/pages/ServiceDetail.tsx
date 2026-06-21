@@ -48,7 +48,7 @@ export default function ServiceDetail() {
   const videoId = subService.youtubeUrl?.match(/(?:youtu\.be\/|v=)([^&]+)/)?.[1];
 
   return (
-    <div className="pb-20 md:pb-0">
+    <div className="pb-safe md:pb-0">
       <PageHero
         size="compact"
         eyebrow={category.name}

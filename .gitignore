@@ -50,3 +50,5 @@ public/firebase-messaging-sw.js
 # Optional: keep repo lean — uncomment if using Git LFS for large assets
 # public/assets/services/*.png
 # public/assets/categories/*.png
+
+.vercel
